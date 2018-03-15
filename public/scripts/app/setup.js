@@ -1,7 +1,7 @@
 
 define(['./util', './game'], function(util, game) {
 
-  const setBoard = (desk) => {
+  const printHTMLGrid = (desk) => {
     const $board     = $(`#${desk}`).find('.board');
     $board.append(`<div></div>`);
 
@@ -28,7 +28,7 @@ define(['./util', './game'], function(util, game) {
     }
   };
 
-  const removeView = (view) => {
+  const removeViewButtons = (view) => {
     $(`.view-${view}`).each(function(index) {
       showOrHideButton($(this));
     });
@@ -46,7 +46,7 @@ define(['./util', './game'], function(util, game) {
         showOrHideButton(next[0], next[1]);
       }
 
-      removeView('zero');
+      removeViewButtons('zero');
     }
     return [$button, proceed];
   };
@@ -55,7 +55,7 @@ define(['./util', './game'], function(util, game) {
     const     $button = $('<button class="view-zero">Play Online</button>');
     function  proceed() {
       alert('It\'s on the to do list...');
-      removeView('zero');
+      removeViewButtons('zero');
     }
     return [$button, proceed];
   };
@@ -70,11 +70,9 @@ define(['./util', './game'], function(util, game) {
     
     function  generateHandler(level) {
       return function() {
-        setBoard('opponent');
-        // ship = new game.Ship('Carrier', 5, [0,0], 0);
-        // alert(ship.getTiles());
-        game.start(level);
-        removeView('one');
+        printHTMLGrid('opponent');
+        start(level);
+        removeViewButtons('one');
       };
     }
 
@@ -84,8 +82,38 @@ define(['./util', './game'], function(util, game) {
   };
 
 
+  // VIEW POSITIONING EVENTS
+  const createReadyButton = () => {
+    const     $button = $('<button class="view-positioning">Ready</button>');
+    function  proceed() {
+      game.start();
+      removeViewButtons('positioning');
+    }
+    return [$button, proceed];
+  };
+
+  const activateOrDeactivateShipDragAndDrop = (activate=true) => {
+
+  };
+
+
+
+  const start = (level) => {
+    $('#opponent').data('level', level);
+
+    $('.board').each(function() {
+      $(this).data('board', util.getInitialFleetObj());
+    });
+
+
+    util.displayBoard('player');
+    activateOrDeactivateShipDragAndDrop();
+
+  };
+
+
   return {
-    setBoard: setBoard,
+    printHTMLGrid: printHTMLGrid,
     showOrHideButton: showOrHideButton,
     createPlayCompButton: createPlayCompButton,
     createPlayOnlineButton: createPlayOnlineButton,

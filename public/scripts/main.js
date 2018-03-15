@@ -1,7 +1,7 @@
 
 requirejs(['app/setup'], function (setup) {
 
-  setup.setBoard('player');
+  setup.printHTMLGrid('player');
   const play_comp_button    = setup.createPlayCompButton();
   const play_online_button  = setup.createPlayOnlineButton();
 
