@@ -68,7 +68,7 @@ define(['./util', './game'], function(util, game) {
       $('<button class="view-one">Hard</button>')
     ];
     
-    function  generateHandler(level) {
+    function generateHandler(level) {
       return function() {
         printHTMLGrid('opponent');
         start(level);
@@ -92,8 +92,28 @@ define(['./util', './game'], function(util, game) {
     return [$button, proceed];
   };
 
-  const activateOrDeactivateShipDragAndDrop = (activate=true) => {
+  const generateShipSelectionHandler = (model) => {
+    return function() {
+      alert(`You clicked on the ${model}`);
+    };
+  };
 
+
+  const activateOrDeactivateShipDragAndDrop = (activate=true) => {
+    let model;
+    let shipSelectionHandler;
+
+    $('.ship').each(function() {
+      let $ship          = $(this);
+      let current_model  = $ship.data('ship');
+
+      if(current_model !== model) {
+        shipSelectionHandler = generateShipSelectionHandler(model);
+        model = current_model;
+      }
+
+      $ship.on('click', shipSelectionHandler);
+    });
   };
 
 
@@ -102,11 +122,10 @@ define(['./util', './game'], function(util, game) {
     $('#opponent').data('level', level);
 
     $('.board').each(function() {
-      $(this).data('board', util.getInitialFleetObj());
+      $(this).data('fleet', util.getInitialFleetObj());
     });
 
-
-    util.displayBoard('player');
+    util.updateBoardFromJSON('player');
     activateOrDeactivateShipDragAndDrop();
 
   };
