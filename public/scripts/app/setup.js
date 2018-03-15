@@ -1,19 +1,18 @@
 
-define(['./game'], function(game) {
+define(['./util', './game'], function(util, game) {
 
   const setBoard = (desk) => {
     const $board     = $(`#${desk}`).find('.board');
-    const x_indeces  = 'ABCDEFGHIJ';
     $board.append(`<div></div>`);
 
     for(let i = 0; i < 10; i ++) {
-      $board.append(`<div class="x-axis"><span>${x_indeces.charAt(i)}</span></div>`);
+      $board.append(`<div class="x-axis"><span>${util.x_indeces.charAt(i)}</span></div>`);
     }
 
     for(let y = 1; y <= 10; y ++) {
       $board.append(`<div class="y-axis"><span>${y}</span></div>`);  
       for(let x = 0; x < 10; x ++) {
-        $board.append(`<div class="tile ${x_indeces.charAt(x)}${y}"></div>`);
+        $board.append(`<div class="tile ${util.x_indeces.charAt(x)}${y}"></div>`);
       }
     }
   };
@@ -71,6 +70,9 @@ define(['./game'], function(game) {
     
     function  generateHandler(level) {
       return function() {
+        setBoard('opponent');
+        // ship = new game.Ship('Carrier', 5, [0,0], 0);
+        // alert(ship.getTiles());
         game.start(level);
         removeView('one');
       };
