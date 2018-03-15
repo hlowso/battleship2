@@ -1,0 +1,48 @@
+$primary: #6b6bff;
+
+main {
+	padding-top: 100px;
+	height: 100vh;
+	display: flex;
+	flex-direction: row;
+}
+
+aside {
+	background-color: #ddd;
+}
+
+.container {
+	width: 40%;
+}
+
+.container {
+
+	padding-left: 6vw;
+	padding-right: 6vw;
+	background-color: $primary;
+
+
+	p,
+	button {
+// 		display: flex;
+// 		flex-direction: column;
+		margin: auto;
+		align-items: center;
+		width: 90%;
+		font-size: 200%;
+	}
+
+	button {
+		
+		border-radius: 5px;
+		border: 2px solid black;
+	}
+
+	button:hover {
+		background-color: #ddd;
+	}
+}
+
+@import 'nav';
+@import 'board';
+
