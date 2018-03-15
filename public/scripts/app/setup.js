@@ -104,15 +104,16 @@ define(['./util', './game'], function(util, game) {
     let shipSelectionHandler;
 
     $('.ship').each(function() {
-      let $ship          = $(this);
-      let current_model  = $ship.data('ship');
+
+      let $ship_part    = $(this);
+      let current_model = $ship_part.data('ship');
 
       if(current_model !== model) {
-        shipSelectionHandler = generateShipSelectionHandler(model);
-        model = current_model;
+        model                 = current_model;
+        shipSelectionHandler  = generateShipSelectionHandler(model);
       }
 
-      $ship.on('click', shipSelectionHandler);
+      $ship_part.on('click', shipSelectionHandler);
     });
   };
 
