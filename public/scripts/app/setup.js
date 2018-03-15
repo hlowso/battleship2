@@ -98,6 +98,11 @@ define(['./util', './game'], function(util, game) {
     };
   };
 
+  function rotationHandler() {
+    const $this = $(this);
+
+    debugger;
+  }
 
   const activateOrDeactivateShipDragAndDrop = (activate=true) => {
     let model;
@@ -113,7 +118,8 @@ define(['./util', './game'], function(util, game) {
         shipSelectionHandler  = generateShipSelectionHandler(model);
       }
 
-      $ship_part.on('click', shipSelectionHandler);
+      $ship_part.on('mousedown', shipSelectionHandler);
+      $ship_part.on('dblclick', rotationHandler);
     });
   };
 
