@@ -22,15 +22,6 @@ define(function() {
           );
   };
 
-  // const tileIndexCoordDifference = (a, b) => {
-  //   return [
-  //     x_indeces.indexOf(a.charAt(0)) - x_indeces.indexOf(b.charAt(0)), 
-  //     Number           (a.charAt(1)) - Number           (b.charAt(1))
-  //   ];
-  // };
-
-  // const addCoord
-
   const getInitialFleetObj    = () => {
     ships = {
       carrier: {

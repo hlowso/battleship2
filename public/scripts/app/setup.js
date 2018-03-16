@@ -1,3 +1,5 @@
+// TODO dodgy behaviour occurs when a ship is dragged off the board
+
 
 define(['./util', './game'], function(util, game) {
 
@@ -73,7 +75,6 @@ define(['./util', './game'], function(util, game) {
     
     function generateHandler(level) {
       return function() {
-        printHTMLGrid('opponent');
         start(level);
         removeViewButtons('one');
       };
@@ -86,6 +87,10 @@ define(['./util', './game'], function(util, game) {
 
 
   // VIEW POSITIONING EVENTS
+  const printPositioningInstructions = () => {
+    const p = $('<p>Drag and drop ships to reposition. Rotate selection with \'R\'.</p>');
+  };
+
   const createReadyButton = () => {
     const     $button = $('<button class="view-positioning">Ready</button>');
     function  proceed() {
@@ -133,9 +138,14 @@ define(['./util', './game'], function(util, game) {
     }
   };
 
+  const rotateVectorAboutOrigin = (vector) => {
+
+    return vector.map((coords) => [coords[1], coords[0]]);
+  };
+
   const generateDragHandler = (model) => {
 
-    const generateGetNeighbours = ($original_tile) => {
+    const generateGetNewTiles = ($original_tile) => {
 
       const index                         = $original_tile.data('index');
       const coords                        = util.tileIndexToCoords(index);
@@ -150,11 +160,18 @@ define(['./util', './game'], function(util, game) {
         );
       });
 
-      return function($tile) {
-        let neighbour_class_selectors  = [];
-        let index       = $tile.data('index');
-        let coords      = util.tileIndexToCoords(index);
-        for(let relative_coords of relative_neighbouring_coords) {
+      const relative_rotated_coords       = rotateVectorAboutOrigin(relative_neighbouring_coords);
+
+      return function($tile, rotate=false) {
+
+        let coords_set                  = (rotate) ? relative_rotated_coords : relative_neighbouring_coords;
+        let neighbour_class_selectors   = [];
+        let index                       = $tile.data('index');
+        let coords                      = util.tileIndexToCoords(index);
+
+//         debugger;
+
+        for(let relative_coords of coords_set) {
           let new_coords = util.addCoords(coords, relative_coords);
           if(!util.validateCoords(new_coords)) {
             return null;
@@ -168,14 +185,26 @@ define(['./util', './game'], function(util, game) {
     };
 
     return function(event) {
-      const getWouldBeShip  = generateGetNeighbours($(this));
+      const getNewTiles = generateGetNewTiles($(this));
       event.preventDefault();
-      $(window).on('mouseup', generateDropHandler(model));
-      $('.tile').on('mouseenter', function() {
 
-        const would_be_tiles = getWouldBeShip($(this));
-        if(validateNewPosition(model, would_be_tiles)) {
-          moveShip(model, would_be_tiles);
+      $(window).on('mouseup', generateDropHandler(model));
+
+      $('.tile').on('mouseenter', function() {
+        const new_tiles = getNewTiles($(this));
+        if(validateNewPosition(model, new_tiles)) {
+          moveShip(model, new_tiles);
+        }
+      });
+
+      $(document).on('keydown', function(event) {
+        
+        if(event.which === 82) {
+          const $center_tile  = $($(`.ship-${model}`)[1]); 
+          const new_tiles     = getNewTiles($center_tile, true);
+          if(validateNewPosition(model, new_tiles)) {
+            moveShip(model, new_tiles);
+          }
         }
       });
     };
@@ -183,8 +212,10 @@ define(['./util', './game'], function(util, game) {
 
   const generateDropHandler = (model) => {
     return function() {
-      $('.tile').off('mouseenter');
       $(window).off('mouseup');
+      $('.tile').off('mouseenter');
+      $(document).off('keydown');
+
       $(`.ship-${model}`).each(function() {
         let dragHandler = generateDragHandler(model).bind(this); 
         $(this).on('mousedown', function(event) {
