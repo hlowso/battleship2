@@ -80,7 +80,7 @@ nav h2 {
   background-color: #ddd;
 }
 
-.board .unharmed {
+.board .ship-unharmed {
   background-color: #666;
   border: none;
 }

@@ -6,6 +6,31 @@ define(function() {
     return `${x_indeces.charAt(coords[0])}${coords[1] + 1}`;
   };
 
+  const tileIndexToCoords     = (tile_index) => {
+
+    return [x_indeces.indexOf(tile_index.charAt(0)), tile_index.match(/\d+/)[0] - 1];
+  };
+
+  const addCoords             = (a, b) => [a[0] + b[0], a[1] + b[1]];
+  const subCoords             = (a, b) => [a[0] - b[0], a[1] - b[1]];
+
+  const validateCoords        = (coords) => {
+    return (coords[0] >= 0 && 
+            coords[0] < 10 &&
+            coords[1] >= 0 &&
+            coords[1] < 10
+          );
+  };
+
+  // const tileIndexCoordDifference = (a, b) => {
+  //   return [
+  //     x_indeces.indexOf(a.charAt(0)) - x_indeces.indexOf(b.charAt(0)), 
+  //     Number           (a.charAt(1)) - Number           (b.charAt(1))
+  //   ];
+  // };
+
+  // const addCoord
+
   const getInitialFleetObj    = () => {
     ships = {
       carrier: {
@@ -76,7 +101,7 @@ define(function() {
           let tile_index = coordsToTileIndex(part.coords);
           let $tile = $board.find(`.${tile_index}`);
           $tile.data('ship', `${key}`);
-          $tile.attr('class', `tile ${tile_index} ship ${key} ${part.state}`);
+          $tile.attr('class', `tile ${tile_index} ship ship-${key} ship-${part.state}`);
         }
       } 
     }
@@ -97,6 +122,10 @@ define(function() {
     x_indeces: x_indeces, 
     coordsToTileIndex: coordsToTileIndex,
     getInitialFleetObj: getInitialFleetObj,
-    updateBoardFromJSON: updateBoardFromJSON
+    updateBoardFromJSON: updateBoardFromJSON,
+    tileIndexToCoords: tileIndexToCoords,
+    addCoords: addCoords,
+    subCoords: subCoords,
+    validateCoords: validateCoords
   };
 });
