@@ -75,6 +75,7 @@ define(['./util', './game'], function(util, game) {
     
     function generateHandler(level) {
       return function() {
+        printPositioningInstructions();
         start(level);
         removeViewButtons('one');
       };
@@ -88,7 +89,8 @@ define(['./util', './game'], function(util, game) {
 
   // VIEW POSITIONING EVENTS
   const printPositioningInstructions = () => {
-    const p = $('<p>Drag and drop ships to reposition. Rotate selection with \'R\'.</p>');
+    const p = $('<p>Drag and drop ships to reposition.<br> Rotate selection with \'R\'.</p>');
+    $('#opponent').append(p);
   };
 
   const createReadyButton = () => {
@@ -143,70 +145,83 @@ define(['./util', './game'], function(util, game) {
     return vector.map((coords) => [coords[1], coords[0]]);
   };
 
+
+  const generateGetNewTiles = ($original_tile) => {
+
+    const index                         = $original_tile.data('index');
+    const coords                        = util.tileIndexToCoords(index);
+    const $ship                         = $(`.ship-${$original_tile.data('ship')}`);
+    const relative_neighbouring_coords  = [];
+
+    $ship.each(function() {
+      let neighbouring_index   = $(this).data('index');
+      let neighbouring_coords  = util.tileIndexToCoords(neighbouring_index);
+      relative_neighbouring_coords.push(
+        util.subCoords(neighbouring_coords, coords)
+      );
+    });
+
+    const relative_rotated_coords       = rotateVectorAboutOrigin(relative_neighbouring_coords);
+
+    return function($tile, rotate=false) {
+
+      let coords_set                  = (rotate) ? relative_rotated_coords : relative_neighbouring_coords;
+      let neighbour_class_selectors   = [];
+      let index                       = $tile.data('index');
+      let coords                      = util.tileIndexToCoords(index);
+
+      for(let relative_coords of coords_set) {
+        let new_coords = util.addCoords(coords, relative_coords);
+        if(!util.validateCoords(new_coords)) {
+          return null;
+        }
+        neighbour_class_selectors.push(
+          '.' + util.coordsToTileIndex(new_coords)
+        );
+      }
+      return $('#player').find(neighbour_class_selectors.toString());
+    };
+  };
+
   const generateDragHandler = (model) => {
 
-    const generateGetNewTiles = ($original_tile) => {
-
-      const index                         = $original_tile.data('index');
-      const coords                        = util.tileIndexToCoords(index);
-      const $ship                         = $(`.ship-${$original_tile.data('ship')}`);
-      const relative_neighbouring_coords  = [];
-
-      $ship.each(function() {
-        let neighbouring_index   = $(this).data('index');
-        let neighbouring_coords  = util.tileIndexToCoords(neighbouring_index);
-        relative_neighbouring_coords.push(
-          util.subCoords(neighbouring_coords, coords)
-        );
-      });
-
-      const relative_rotated_coords       = rotateVectorAboutOrigin(relative_neighbouring_coords);
-
-      return function($tile, rotate=false) {
-
-        let coords_set                  = (rotate) ? relative_rotated_coords : relative_neighbouring_coords;
-        let neighbour_class_selectors   = [];
-        let index                       = $tile.data('index');
-        let coords                      = util.tileIndexToCoords(index);
-
-//         debugger;
-
-        for(let relative_coords of coords_set) {
-          let new_coords = util.addCoords(coords, relative_coords);
-          if(!util.validateCoords(new_coords)) {
-            return null;
-          }
-          neighbour_class_selectors.push(
-            '.' + util.coordsToTileIndex(new_coords)
-          );
-        }
-        return $('#player').find(neighbour_class_selectors.toString());
-      };
-    };
 
     return function(event) {
       const getNewTiles = generateGetNewTiles($(this));
       event.preventDefault();
+      const prepareTilesForMoves = (newTilesGetter) => {
+ 
+        $('.tile').off('mouseenter');
+        $('.tile').on('mouseenter', function() {
 
-      $(window).on('mouseup', generateDropHandler(model));
-
-      $('.tile').on('mouseenter', function() {
-        const new_tiles = getNewTiles($(this));
-        if(validateNewPosition(model, new_tiles)) {
-          moveShip(model, new_tiles);
-        }
-      });
-
-      $(document).on('keydown', function(event) {
-        
-        if(event.which === 82) {
-          const $center_tile  = $($(`.ship-${model}`)[1]); 
-          const new_tiles     = getNewTiles($center_tile, true);
+          $('#cursor').removeAttr('id');
+          $(this).attr('id', 'cursor');
+          const new_tiles = newTilesGetter($(this));
           if(validateNewPosition(model, new_tiles)) {
             moveShip(model, new_tiles);
           }
-        }
-      });
+        });
+
+        prepareTilesForRotation(newTilesGetter);
+      };
+
+      const prepareTilesForRotation = (newTilesGetter) => {
+        $(document).off('keydown');
+        $(document).on('keydown', function(event) {
+      
+          if(event.which === 82) {
+            const $center_tile  = $('#cursor'); 
+            const new_tiles     = newTilesGetter($center_tile, true);
+            if(validateNewPosition(model, new_tiles)) {
+              moveShip(model, new_tiles);
+              prepareTilesForMoves(generateGetNewTiles($center_tile));
+            }
+          }
+        });
+      };
+
+      $(window).on('mouseup', generateDropHandler(model));
+      prepareTilesForMoves(getNewTiles);
     };
   };
 
