@@ -55,7 +55,7 @@ define(['./util', './game'], function(util, game) {
     const     $button = $('<button class="view-zero-button">Play Computer</button>');
     function  proceed() {
       
-      $('#opponent').find('.board').data('fleet', util.getInitialFleetObj());
+      //$('#opponent').find('.board').data('fleet', util.getInitialFleetObj());
       const next_set = createChooseDifficultyButtons();
       for(let next of next_set) {
         showOrRemoveButton(next[0], next[1], $('#opponent'));
@@ -274,6 +274,7 @@ define(['./util', './game'], function(util, game) {
     const ready_button = createReadyButton();
     $('.board').each(function() {
       $(this).data('fleet', util.getInitialFleetObj());
+      $(this).data('sea', []);
     });
 
     util.updateBoardFromJSON('player');

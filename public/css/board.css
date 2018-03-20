@@ -31,7 +31,28 @@
   background-color: #ddd;
 }
 
+.board .ship-unharmed,
+.board .ship-hit,
+.board .ship-sunk,
+.board .hit,
+.board .sunk {
+  border: none;
+}
+
 .board .ship-unharmed {
   background-color: #666;
-  border: none;
+}
+
+.board .ship-hit,
+.board .hit,
+.board .sunk {
+  background-color: orange;
+}
+
+.board .ship-sunk {
+  background-color: red;
+}
+
+.board .miss {
+  background-color: yellow;
 }
