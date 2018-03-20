@@ -1,35 +1,64 @@
 
 define(['./util'], function(util) {
 
-  // class Ship {
-  //   constructor(model, length, bow_coords, orientaion) {
+  const move = (level) => {
+    switch(level) {
+      case 1: 
+        easyMove();
+        break;
+    }
+  };
 
-  //     this.model   = model;
-  //     this.coords  = [];
-  //     this.tiles   = [];
+  const easyMove = () => {
 
-  //     for(let i = 0; i < length; i ++) {
-  //       this.coords.push(bow_coords);
-  //       this.tiles.push(
-  //         util.coordsToTileIndex(bow_coords)
-  //       );
-  //       bow_coords[orientaion] ++;
-  //     }
+  };
 
-  //   }
+  const toggleOpponentBoardState = (on=true) => {
+    // for(let l of util.x_indeces) {
+    //   for(let y = 1; y <= 10; y ++) {
 
-  //   getTiles() {
-  //     return this.tiles;
-  //   }
-   
-  // }
+    //   }
+    // }
+    const $board = $('#opponent').find('.board');
+    debugger;
+
+    if(on) {
+      $board.on('click', function(event) {
+        debugger;
+      }); 
+    }
+    else {
+      $board.off('click');
+    }
+  };
+
+  const computerPlay = (level, player_to_move) => {
+    if(player_to_move === 'player') {
+      toggleOpponentBoardState();
+      toggleOpponentBoardState(false);
+    }
+    else {
+      move(level);
+    }
+  };
+
+  const onlinePlay = (first_player) => {
+
+  };
   
-  const start = () => {
-    alert('NOW we begin');
+  const start = (level, first_player) => {
+
+    debugger;
+
+    if(level === 'online') {
+      onlinePlay(first_player);
+    }
+    else {
+      computerPlay(level, first_player);
+    }
   };
 
   return {
-    start: start
+    start
   };
-
 });

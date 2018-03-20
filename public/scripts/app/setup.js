@@ -1,4 +1,6 @@
 // TODO dodgy behaviour occurs when a ship is dragged off the board
+// TODO clean up code NOW meaning BEFORE you move on. Doesn't have to take a lot of time,
+// just make sure everything's well-organized
 
 
 define(['./util', './game'], function(util, game) {
@@ -22,33 +24,41 @@ define(['./util', './game'], function(util, game) {
     }
   };
 
-  const showOrHideButton = ($button, callback=null) => {
+  const showOrRemoveButton = ($button, callback=null, $where=null) => {
     if(callback) {
+      $where.append($button);
       $button.show();
       $button.on('click', callback);
     }
     else {
       $button.off();
-      $button.hide();
+      $button.remove();
     }
   };
 
   const removeViewButtons = (view) => {
-    $(`.view-${view}`).each(function(index) {
-      showOrHideButton($(this));
+    $(`.view-${view}-button`).each(function() {
+      showOrRemoveButton($(this));
+    });
+  };
+
+  const removeView = (view) => {
+    removeViewButtons(view);
+    $(`.view-${view}`).each(function() {
+      $(this).remove();
     });
   };
 
 
   // VIEW ZERO BUTTONS
   const createPlayCompButton = () => {
-    const     $button = $('<button class="view-zero">Play Computer</button>');
+    const     $button = $('<button class="view-zero-button">Play Computer</button>');
     function  proceed() {
       
+      $('#opponent').find('.board').data('fleet', util.getInitialFleetObj());
       const next_set = createChooseDifficultyButtons();
       for(let next of next_set) {
-        $('#opponent').append(next[0]);
-        showOrHideButton(next[0], next[1]);
+        showOrRemoveButton(next[0], next[1], $('#opponent'));
       }
 
       removeViewButtons('zero');
@@ -57,8 +67,9 @@ define(['./util', './game'], function(util, game) {
   };
 
   const createPlayOnlineButton = () => {
-    const     $button = $('<button class="view-zero">Play Online</button>');
+    const     $button = $('<button class="view-zero-button">Play Online</button>');
     function  proceed() {
+      $('#opponent').data('level', 'online');
       alert('It\'s on the to do list...');
       removeViewButtons('zero');
     }
@@ -69,14 +80,14 @@ define(['./util', './game'], function(util, game) {
   // VIEW ONE BUTTONS
   const createChooseDifficultyButtons = () => {
     const level_buttons = [
-      $('<button class="view-one">Easy</button>'),
-      $('<button class="view-one">Hard</button>')
+      $('<button class="view-one-button">Easy</button>'),
+      $('<button class="view-one-button">Hard</button>')
     ];
     
     function generateHandler(level) {
       return function() {
-        printPositioningInstructions();
-        start(level);
+        $('#opponent').data('level', level);
+        beginPositioningPhase();
         removeViewButtons('one');
       };
     }
@@ -86,18 +97,19 @@ define(['./util', './game'], function(util, game) {
     );
   };
 
-
   // VIEW POSITIONING EVENTS
   const printPositioningInstructions = () => {
-    const p = $('<p>Drag and drop ships to reposition.<br> Rotate selection with \'R\'.</p>');
+    const p = $('<p class="view-positioning">Drag and drop ships to reposition.<br> Rotate selection with \'R\'.</p>');
     $('#opponent').append(p);
   };
 
   const createReadyButton = () => {
-    const     $button = $('<button class="view-positioning">Ready</button>');
+    const     $button = $('<button class="view-positioning-button">Ready</button>');
     function  proceed() {
-      game.start();
-      removeViewButtons('positioning');
+      activateOrDeactivateShipDragAndDrop(false);
+      removeView('positioning');
+      util.updateJSONFromBoard('player');
+      postPositioning();
     }
     return [$button, proceed];
   };
@@ -113,6 +125,7 @@ define(['./util', './game'], function(util, game) {
         valid = false;
       }
     });
+
     return valid;
   };
 
@@ -140,12 +153,6 @@ define(['./util', './game'], function(util, game) {
     }
   };
 
-  const rotateVectorAboutOrigin = (vector) => {
-
-    return vector.map((coords) => [coords[1], coords[0]]);
-  };
-
-
   const generateGetNewTiles = ($original_tile) => {
 
     const index                         = $original_tile.data('index');
@@ -161,7 +168,7 @@ define(['./util', './game'], function(util, game) {
       );
     });
 
-    const relative_rotated_coords       = rotateVectorAboutOrigin(relative_neighbouring_coords);
+    const relative_rotated_coords       = util.rotateVector(relative_neighbouring_coords);
 
     return function($tile, rotate=false) {
 
@@ -227,6 +234,7 @@ define(['./util', './game'], function(util, game) {
 
   const generateDropHandler = (model) => {
     return function() {
+      $('#cursor').removeAttr('id');
       $(window).off('mouseup');
       $('.tile').off('mouseenter');
       $(document).off('keydown');
@@ -243,36 +251,94 @@ define(['./util', './game'], function(util, game) {
 
   const activateOrDeactivateShipDragAndDrop = (activate=true) => {
 
-    $('.ship').each(function() {
-      let $ship_part   = $(this);
-      let model        = $ship_part.data('ship');
-      let dragHandler  = generateDragHandler(model).bind(this);
+    if(activate) {
+      $('.ship').each(function() {
+        let $ship_part   = $(this);
+        let model        = $ship_part.data('ship');
+        let dragHandler  = generateDragHandler(model).bind(this);
 
-      $ship_part.on('mousedown', function(event) {
-        dragHandler(event);
+        $ship_part.on('mousedown', function(event) {
+          dragHandler(event);
+          $(this).off('mousedown');
+        });
+      });
+    }
+    else {
+      $('.ship').each(function() {
         $(this).off('mousedown');
       });
-    });
+    }
   };
 
-
-
-  const start = (level) => {
-    $('#opponent').data('level', level);
-
+  const beginPositioningPhase = () => {
+    const ready_button = createReadyButton();
     $('.board').each(function() {
       $(this).data('fleet', util.getInitialFleetObj());
     });
 
     util.updateBoardFromJSON('player');
+    printPositioningInstructions();
     activateOrDeactivateShipDragAndDrop();
+    showOrRemoveButton(ready_button[0], ready_button[1], $('#opponent'));
 
+  };
+
+
+  // VIEW POST-POSITIONING EVENTS
+  const printChoiceInstructions = () => {
+    const p = $('<p class="view-post-positioning">Who goes first?</p>');
+    $('#opponent').append(p);
+  };
+
+  const showChooseFirstButtons = (level) => {
+    const buttons = [
+      $('<button id="random-first-player" class="view-post-positioning-button">Randomize</button>'),
+      $('<button id="your-choice" class="view-post-positioning-button">Your Choice</button>')
+    ];
+
+    function proceedRandom() {
+      removeView('post-positioning');
+      printHTMLGrid('opponent');
+      game.start(level, (Math.random() < 0.5) ? 'player' : 'opponent');
+    }
+
+    function proceedChoice() {
+      removeView('post-positioning');
+      const buttons = [
+        $('<button class="view-choice-button">You</button>'),
+        $('<button class="view-choice-button">Computer</button>')
+      ];
+
+      const getProcedure = (who) => {
+        return function() {
+          removeView('choice');
+          printHTMLGrid('opponent');
+          game.start(level, who);
+        };
+      };
+
+      showOrRemoveButton(buttons[0], getProcedure('player'), $('#opponent'));
+      showOrRemoveButton(buttons[1], getProcedure('opponent'), $('#opponent'));
+    }
+
+    showOrRemoveButton(buttons[0], proceedRandom, $('#opponent'));
+    showOrRemoveButton(buttons[1], proceedChoice, $('#opponent'));
+  };
+
+  const postPositioning = () => {           
+    const level = $('#opponent').data('level');
+    if(level === 'online') {
+      game.start('online');
+    }
+    else {
+      showChooseFirstButtons(level);
+    }
   };
 
 
   return {
     printHTMLGrid: printHTMLGrid,
-    showOrHideButton: showOrHideButton,
+    showOrRemoveButton: showOrRemoveButton,
     createPlayCompButton: createPlayCompButton,
     createPlayOnlineButton: createPlayOnlineButton,
     createChooseDifficultyButtons: createChooseDifficultyButtons 
