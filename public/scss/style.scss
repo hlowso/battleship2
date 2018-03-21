@@ -17,9 +17,34 @@ main {
 	background-color: $primary;
 
 	p,
-	button {
+	button,
+	.name {
+		display: flex;
+		justify-content: center;
+	}
+
+	.name {
+		font-size: 200%;
+		width: 200px;
+		min-height: 50px;
 		margin: auto;
-		align-items: center;
+		margin-bottom: 10px;
+		padding: 5px;
+		border: 2px solid black;
+		border-radius: 30px;
+		background-color: $primary;
+	}
+
+	// #opponent .name {
+	// 	display: none;
+	// }
+
+	p,
+	button {
+		// margin: auto;
+		margin-top: 40px;
+		// align-items: center;
+
 		width: 90%;
 		font-size: 200%;
 	}

@@ -14,9 +14,27 @@ main {
 }
 
 .container p,
-.container button {
+.container button,
+.container .name {
+  display: flex;
+  justify-content: center;
+}
+
+.container .name {
+  font-size: 200%;
+  width: 200px;
+  min-height: 50px;
   margin: auto;
-  align-items: center;
+  margin-bottom: 10px;
+  padding: 5px;
+  border: 2px solid black;
+  border-radius: 30px;
+  background-color: #6b6bff;
+}
+
+.container p,
+.container button {
+  margin-top: 40px;
   width: 90%;
   font-size: 200%;
 }
