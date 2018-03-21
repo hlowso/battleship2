@@ -100,25 +100,27 @@ define(['./util'], function(util) {
   // PLAYER MOVES
   const getBoardClickHandler = ($board) => {
     return function(event) {
-      const index   = $(event.target).data('index');
-      const change  = attemptAttack($board, index, 'player');
-      if(change) {
-        toggleOpponentBoardState(false);
-        util.updateBoardFromJSON('opponent');
-        let win = checkWin($board.data('fleet'));
-        if(win) {
-          alert('You win!');
-        }
-        else {
-          let level = $('#opponent').data('level');
-          if(level === 'online') {
-
+      if($(event.target).prop('tagName') !== 'SPAN') {
+        const index   = $(event.target).data('index');
+        const change  = attemptAttack($board, index, 'player');
+        if(change) {
+          toggleOpponentBoardState(false);
+          util.updateBoardFromJSON('opponent');
+          let win = checkWin($board.data('fleet'));
+          if(win) {
+            alert('You win!');
           }
           else {
-            computerPlay(level, 'computer');
+            let level = $('#opponent').data('level');
+            if(level === 'online') {
+
+            }
+            else {
+              computerPlay(level, 'computer');
+            }
           }
         }
-      }
+      } 
     };
   };
 
@@ -156,7 +158,7 @@ define(['./util'], function(util) {
     }
     else {
       toggleNameHighlights(false);
-      setTimeout(() => move(level), 1000);
+      setTimeout(() => move(level), 500); //1000);
     }
   };
 

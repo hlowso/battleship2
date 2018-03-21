@@ -10,11 +10,11 @@ define(['./util', './game'], function(util, game) {
     $board.append(`<div></div>`);
 
     for(let i = 0; i < 10; i ++) {
-      $board.append(`<div class="x-axis"><span>${util.x_indeces.charAt(i)}</span></div>`);
+      $board.append(`<div class="x-axis">${util.x_indeces.charAt(i)}</div>`);
     }
 
     for(let y = 1; y <= 10; y ++) {
-      $board.append(`<div class="y-axis"><span>${y}</span></div>`);  
+      $board.append(`<div class="y-axis">${y}</div>`);  
       for(let x = 0; x < 10; x ++) {
         let index = `${util.x_indeces.charAt(x)}${y}`;
         let $tile = $(`<div class="tile ${index}"></div>`);

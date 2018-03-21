@@ -11,8 +11,8 @@
   font-size: 150%;
 }
 
-.board .x-axis span,
-.board .y-axis span {
+.board .x-axis,
+.board .y-axis {
   padding-left: 6px;
   padding-right: 6px;
   padding-bottom: 10px;
