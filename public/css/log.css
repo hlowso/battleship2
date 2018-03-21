@@ -1,0 +1,19 @@
+aside {
+  width: 20%;
+  background-color: #ddd;
+}
+
+aside h3 {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  height: 40px;
+  border-top: 2px solid black;
+  border-bottom: 2px solid black;
+}
+
+aside #log-messages {
+  height: 500px;
+  overflow: scroll;
+  border-bottom: 1px solid black;
+}

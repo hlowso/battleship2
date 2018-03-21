@@ -26,7 +26,7 @@ define(['./util', './game'], function(util, game) {
 
   const showOrRemoveButton = ($button, callback=null, $where=null) => {
     if(callback) {
-      $where.append($button);
+      $where.prepend($button);
       $button.show();
       $button.on('click', callback);
     }

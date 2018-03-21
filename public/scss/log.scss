@@ -2,13 +2,21 @@
 aside {
 	width: 20%;
 	background-color: #ddd;
+
+	h3 {
+	}
+
 	h3 {
 		display: flex;
 		justify-content: center;
-		border: 2px solid black;
+		margin: 0;
+		height: 40px;
+		border-top: 2px solid black;
+		border-bottom: 2px solid black;
 	}	
 	#log-messages {
-		max-height: 500px;
-		overflow: scroll;
+		height: 500px;
+		overflow: scroll;	
+		border-bottom: 1px solid black;
 	}
 }

@@ -28,6 +28,17 @@ define(['./util'], function(util) {
     attemptAttack($board, possible_targets[Math.floor(Math.random() * possible_targets.length)], 'computer');
   };
 
+  const addToShipGraveyard = (ship_name, player=true) => {
+    let $grave;
+    if(player) {
+      $grave = $('#opponent').find(`.${ship_name}-grave`);
+    }
+    else {
+      $grave = $('#player').find(`.${ship_name}-grave`);
+    }
+    $grave.html(ship_name);
+  };
+
   const checkSunk = (fleet, ship_name, who) => {
     const ship = fleet[ship_name];
     if(ship.parts.find(part => part.state !== 'hit')) {
@@ -37,6 +48,7 @@ define(['./util'], function(util) {
       part.state = 'sunk';
     }
     logMessage(who, `has sunk the ${ship_name}!`);
+    addToShipGraveyard(ship_name, (who === 'player'));
     return true;
   };
 
@@ -66,9 +78,9 @@ define(['./util'], function(util) {
 
           if(part.state === 'unharmed') {
             part.state = 'hit';
+            logMessage(who, `fires at ${index}: HIT`);
             checkSunk(fleet, ship_name, who);
             $board.data('fleet', fleet);
-            logMessage(who, `fires at ${index}: HIT`);
             return true;
           }
           return false;
@@ -120,11 +132,30 @@ define(['./util'], function(util) {
     }
   };
 
+  const toggleNameHighlights = (player=true) => {
+    let $playing, $waiting;
+    const $player = $('#player').find('.name');
+    const $opponent = $('#opponent').find('.name');
+    if(player) {
+      $playing = $player;
+      $waiting = $opponent;
+    }
+    else {
+      $playing = $opponent;
+      $waiting = $player;
+    }
+    $playing.css('background-color', '#73d473');
+    $waiting.css('background-color', '');
+  };
+
   const computerPlay = (level, player_to_move) => {
+
     if(player_to_move === 'player') {
+      toggleNameHighlights();
       toggleOpponentBoardState();
     }
     else {
+      toggleNameHighlights(false);
       setTimeout(() => move(level), 1000);
     }
   };
@@ -135,11 +166,16 @@ define(['./util'], function(util) {
   };  
 
   const start = (level, first_player) => {
+
     logMessage(first_player, `goes first...`);
+    $('.ship-graveyard').css('display', 'grid');
+
     if(level === 'online') {
       onlinePlay(first_player);
     }
     else {
+      const $name = $('<div class="name">Computer</div>');
+      $('#opponent').prepend($name);
       computerPlay(level, first_player);
     }
   };

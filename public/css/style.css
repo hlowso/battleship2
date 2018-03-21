@@ -6,6 +6,7 @@ main {
 }
 
 .container {
+  position: relative;
   padding-left: 6vw;
   padding-right: 6vw;
   width: 40%;
@@ -13,19 +14,13 @@ main {
   background-color: #6b6bff;
 }
 
-.container p,
-.container button,
 .container .name {
   display: flex;
   justify-content: center;
-}
-
-.container .name {
   font-size: 200%;
   width: 200px;
   min-height: 50px;
-  margin: auto;
-  margin-bottom: 10px;
+  margin: 10px auto;
   padding: 5px;
   border: 2px solid black;
   border-radius: 30px;
@@ -33,9 +28,15 @@ main {
 }
 
 .container p,
-.container button {
+.container button,
+.container .ship-graveyard {
+  width: 100%;
+  margin: auto;
   margin-top: 40px;
-  width: 90%;
+}
+
+.container p,
+.container button {
   font-size: 200%;
 }
 
@@ -46,6 +47,37 @@ main {
 
 .container button:hover {
   background-color: #ddd;
+}
+
+.container .ship-graveyard {
+  display: none;
+  height: 100px;
+  grid-template-columns: repeat(3, 33.333%);
+  font-size: 120%;
+  color: #ddd;
+}
+
+.container .ship-graveyard div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  border-left: 2px solid black;
+  border-top: 2px solid black;
+}
+
+.container .ship-graveyard .battleship-grave {
+  border-bottom: 2px solid black;
+}
+
+.container .ship-graveyard .submarine-grave,
+.container .ship-graveyard .destroyer-grave {
+  border-bottom: 2px solid black;
+  border-right: 2px solid black;
+}
+
+.container .ship-graveyard .blackout {
+  border: none;
 }
 
 nav {
@@ -70,12 +102,16 @@ aside {
 aside h3 {
   display: flex;
   justify-content: center;
-  border: 2px solid black;
+  margin: 0;
+  height: 40px;
+  border-top: 2px solid black;
+  border-bottom: 2px solid black;
 }
 
 aside #log-messages {
-  max-height: 500px;
+  height: 500px;
   overflow: scroll;
+  border-bottom: 1px solid black;
 }
 
 .board {
