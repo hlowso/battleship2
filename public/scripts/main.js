@@ -1,10 +1,11 @@
 
 requirejs(['app/setup'], function (setup) {
 
-  // const ws = new WebSocket('ws://localhost:8080');
-  // ws.addEventListener('open', event => {
-  //   ws.send('You gotta hear this!');
-  // });
+  const ws = new WebSocket('ws://localhost:3001');
+  // ws.onopen = data => {
+  //   console.log(data);
+  // };
+  
 
   setup.printHTMLGrid('player');
   const play_comp_button    = setup.createPlayCompButton();
