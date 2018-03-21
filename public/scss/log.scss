@@ -1,0 +1,14 @@
+
+aside {
+	width: 20%;
+	background-color: #ddd;
+	h3 {
+		display: flex;
+		justify-content: center;
+		border: 2px solid black;
+	}	
+	#log-messages {
+		max-height: 500px;
+		overflow: scroll;
+	}
+}

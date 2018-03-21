@@ -25,10 +25,10 @@ define(['./util'], function(util) {
     const fleet             = $board.data('fleet');
     const sea               = $board.data('sea');
     const possible_targets  = util.getAllUnmolested(fleet, sea);
-    attemptAttack($board, possible_targets[Math.floor(Math.random() * possible_targets.length)]);
+    attemptAttack($board, possible_targets[Math.floor(Math.random() * possible_targets.length)], 'computer');
   };
 
-  const checkSunk = (fleet, ship_name) => {
+  const checkSunk = (fleet, ship_name, who) => {
     const ship = fleet[ship_name];
     if(ship.parts.find(part => part.state !== 'hit')) {
       return false;
@@ -36,6 +36,7 @@ define(['./util'], function(util) {
     for(let part of ship.parts) {
       part.state = 'sunk';
     }
+    logMessage(who, `has sunk the ${ship_name}!`);
     return true;
   };
 
@@ -50,7 +51,7 @@ define(['./util'], function(util) {
     return true;
   };
 
-  const attemptAttack = ($board, index) => {
+  const attemptAttack = ($board, index, who) => {
     const fleet = $board.data('fleet');
     const sea   = $board.data('sea');
 
@@ -65,8 +66,9 @@ define(['./util'], function(util) {
 
           if(part.state === 'unharmed') {
             part.state = 'hit';
-            checkSunk(fleet, ship_name);
+            checkSunk(fleet, ship_name, who);
             $board.data('fleet', fleet);
+            logMessage(who, `fires at ${index}: HIT`);
             return true;
           }
           return false;
@@ -79,6 +81,7 @@ define(['./util'], function(util) {
     }
     sea.push(index);
     $board.data('sea', sea);
+    logMessage(who, `fires at ${index}: MISS`);
     return true;
   };
 
@@ -86,7 +89,7 @@ define(['./util'], function(util) {
   const getBoardClickHandler = ($board) => {
     return function(event) {
       const index   = $(event.target).data('index');
-      const change  = attemptAttack($board, index);
+      const change  = attemptAttack($board, index, 'player');
       if(change) {
         toggleOpponentBoardState(false);
         util.updateBoardFromJSON('opponent');
@@ -126,7 +129,13 @@ define(['./util'], function(util) {
     }
   };
 
+  const logMessage = (who, message) => {
+    const $message = $(`<p> - <strong>${who}</strong> ${message}</p>`);
+    $('#log-messages').prepend($message);
+  };  
+
   const start = (level, first_player) => {
+    logMessage(first_player, `goes first...`);
     if(level === 'online') {
       onlinePlay(first_player);
     }

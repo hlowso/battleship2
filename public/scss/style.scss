@@ -7,22 +7,17 @@ main {
 	flex-direction: row;
 }
 
-aside {
-	background-color: #ddd;
-}
 
 .container {
 
 	padding-left: 6vw;
 	padding-right: 6vw;
 	width: 40%;
+	border: 1px solid black;
 	background-color: $primary;
-
 
 	p,
 	button {
-// 		display: flex;
-// 		flex-direction: column;
 		margin: auto;
 		align-items: center;
 		width: 90%;
@@ -41,5 +36,6 @@ aside {
 }
 
 @import 'nav';
+@import 'log';
 @import 'board';
 
