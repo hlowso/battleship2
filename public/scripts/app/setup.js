@@ -51,13 +51,10 @@ define(['./util', './game'], function(util, game) {
   const createPlayCompButton = () => {
     const     $button = $('<button class="view-zero-button">Play Computer</button>');
     function  proceed() {
-      
-      //$('#opponent').find('.board').data('fleet', util.getInitialFleetObj());
       const next_set = createChooseDifficultyButtons();
       for(let next of next_set) {
         showOrRemoveButton(next[0], next[1], $('#opponent'));
       }
-
       removeViewButtons('zero');
     }
     return [$button, proceed];
@@ -101,6 +98,25 @@ define(['./util', './game'], function(util, game) {
         type: 'join',
         data: { username }
       }));
+
+      ws.onmessage = event => {
+        const opponent  = JSON.parse(event.data);
+        const opp_name  = opponent.username; 
+
+        $('#opponent').data('name', `${opp_name}`);
+        $lobby.find('p').text(`Found player: ${opp_name}. Game will start in 5 seconds.`);
+        
+        setTimeout(() => { 
+          $lobby.modal('hide').data('bs.modal', null);
+          removeView('zero');
+          beginPositioningPhase(); 
+        }, 5000);
+      };
+
+      ws.onclose = event => {
+        alert('Connection broken!');
+        window.location.replace('/');
+      };
     };
 
     $('#player').data('name', username);
