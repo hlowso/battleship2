@@ -281,6 +281,8 @@ define(function() {
     return div.innerHTML;
   };
 
+  const WEBSOCKET_URL = 'ws://localhost:3001';
+
   return {
     x_indeces, 
     coordsToTileIndex,
@@ -294,6 +296,7 @@ define(function() {
     rotateVector,
     getAllUnmolested,
     createModal,
-    escape
+    escape,
+    WEBSOCKET_URL
   };
 });

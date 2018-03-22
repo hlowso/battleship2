@@ -94,15 +94,25 @@ define(['./util', './game'], function(util, game) {
   };
 
   // ONLINE WAITING ROOM
-  const addMeToLobby = (username) => {
-    alert('will add ' + username);
+  const addMeToLobby = (username, $lobby) => {
+    const ws = new WebSocket(util.WEBSOCKET_URL);
+    ws.onopen = data => {
+      console.log('Connected over here!');
+    };
+
+    $('#player').data('name', username);
+    $lobby.find('p').text('Added to lobby. Now waiting for opponent...');
+    $lobby.find('input').remove();
+    $lobby.on('hidden.bs.modal', function(event) {
+      ws.close();
+    });
   };
 
   const goToLobby = () => {
     const $lobby = util.createModal('lobby', `
       <h3>Lobby</h3>
     `, `
-      <p>Enter a username to join the lobby.<p>
+      <p>Enter a username to join the lobby.</p>
       <input placeholder="..."> 
     `);
 
@@ -113,7 +123,7 @@ define(['./util', './game'], function(util, game) {
           alert('field must not be left empty');
         }
         else {
-          addMeToLobby(username);
+          addMeToLobby(username, $lobby);
         }
       }
     });

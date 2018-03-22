@@ -1,11 +1,6 @@
 // $(document).ready(function() {
 requirejs(['app/setup', 'app/leaderboard'], function (setup, leaderboard) {
 
-  //const ws = new WebSocket('ws://localhost:3001');
-  // ws.onopen = data => {
-  //   console.log(data);
-  // };
-
   $('#leaderboard-button').on('click', leaderboard.getAndPrint);
 
   setup.printHTMLGrid('player');
