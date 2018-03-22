@@ -102,21 +102,12 @@ define(function() {
       );
     }
 
-//     const translations = [[1, 0], [-1, 0], [0, 1], [0, -1], [2, 0], [-2, 0], [0, 2], [0, -2]];
     for(let i = 0; i < 100000; i ++) {
 
       let ship_name = ship_names[Math.floor(Math.random() * ship_names.length)]; 
       let vector = getVectorFromParts(fleet[ship_name].parts);
 
       vector = teleportVector(vector);
-
-      // if(Math.random() < 0.2) {
-      //   vector = rotateVector(vector, vector[Math.floor(vector.length / 2.0)]);
-      // }
-      // else {
-      //   let translation = translations[Math.floor(Math.random() * 8)];
-      //   vector = translateVector(vector, translation);
-      // }
 
       if(validateMove(ship_name, vector, grid)) {
         addShipToGrid(grid, vector, ship_name);
@@ -267,6 +258,22 @@ define(function() {
     return unmolested;
   };
 
+  const createModal = (id, header_content, body_content) => {
+    return $(`
+      <div class="modal fade" id="${id}" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              ${header_content}
+            </div>
+            <div class="modal-body">
+              ${body_content}
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+  };
 
   return {
     x_indeces, 
@@ -279,6 +286,7 @@ define(function() {
     subCoords,
     validateCoords,
     rotateVector,
-    getAllUnmolested
+    getAllUnmolested,
+    createModal
   };
 });

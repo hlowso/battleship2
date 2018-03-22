@@ -1,0 +1,9 @@
+#leaderboard th,
+#leaderboard td {
+  padding: 5px;
+}
+
+#leaderboard .modal-content {
+  max-height: 637px;
+  overflow: scroll;
+}

@@ -1,11 +1,12 @@
+// $(document).ready(function() {
+requirejs(['app/setup', 'app/leaderboard'], function (setup, leaderboard) {
 
-requirejs(['app/setup'], function (setup) {
-
-  const ws = new WebSocket('ws://localhost:3001');
+  //const ws = new WebSocket('ws://localhost:3001');
   // ws.onopen = data => {
   //   console.log(data);
   // };
-  
+
+  $('#leaderboard-button').on('click', leaderboard.getAndPrint);
 
   setup.printHTMLGrid('player');
   const play_comp_button    = setup.createPlayCompButton();
@@ -15,3 +16,4 @@ requirejs(['app/setup'], function (setup) {
   setup.showOrRemoveButton(play_online_button[0], play_online_button[1], $('#opponent'));
 
 });
+

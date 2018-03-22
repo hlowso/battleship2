@@ -82,21 +82,39 @@ main {
 
 nav {
   position: fixed;
+  display: flex;
+  justify-content: space-between;
   width: 100%;
   height: 100px;
   background-color: navy;
 }
 
+nav .balancer {
+  width: 177px;
+}
+
+nav #leaderboard-button {
+  margin-top: 10px;
+  margin-right: 10px;
+  height: 50px;
+  border: 2px solid black;
+  border-radius: 10px;
+  font-size: 200%;
+  background-color: white;
+}
+
+nav #leaderboard-button:hover {
+  background-color: #ddd;
+}
+
 nav h2 {
-  display: flex;
-  justify-content: center;
   font-size: 300%;
   color: #ddd;
 }
 
 aside {
   width: 20%;
-  background-color: #ddd;
+  background-color: #bbb;
 }
 
 aside h3 {
@@ -109,9 +127,12 @@ aside h3 {
 }
 
 aside #log-messages {
+  padding: 10px;
   height: 500px;
   overflow: scroll;
   border-bottom: 1px solid black;
+  background-color: #ddd;
+  font-size: 150%;
 }
 
 .board {
@@ -160,15 +181,25 @@ aside #log-messages {
 }
 
 .board .ship-hit,
-.board .hit,
-.board .sunk {
+.board .hit {
   background-color: orange;
 }
 
-.board .ship-sunk {
+.board .ship-sunk,
+.board .sunk {
   background-color: red;
 }
 
 .board .miss {
   background-color: yellow;
+}
+
+#leaderboard th,
+#leaderboard td {
+  padding: 5px;
+}
+
+#leaderboard .modal-content {
+  max-height: 637px;
+  overflow: scroll;
 }

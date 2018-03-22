@@ -47,12 +47,12 @@ $tile_height: $tile_width;
 	}
 
 	.ship-hit,
-	.hit,
-	.sunk {
+	.hit{
 		background-color: orange;
 	}
 
-	.ship-sunk {
+	.ship-sunk,
+	.sunk {
 		background-color: red;
 	}
 

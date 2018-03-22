@@ -1,12 +1,29 @@
 nav {
 	position: fixed;
+	display: flex;
+	justify-content: space-between;
 	width: 100%;
 	height: 100px;
 	background-color: navy;
+	.balancer {
+		width: 177px;
+	}
+
+	#leaderboard-button {
+		margin-top: 10px;
+		margin-right: 10px;
+		height: 50px;
+		border: 2px solid black;
+		border-radius: 10px;
+		font-size: 200%;
+		background-color: white;
+	}
+
+	#leaderboard-button:hover {
+		background-color: #ddd;
+	}
 
 	h2 {
-		display: flex;
-		justify-content: center;
 		font-size: 300%;
 		color: #ddd;
 	}

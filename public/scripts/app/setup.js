@@ -1,7 +1,4 @@
 // TODO dodgy behaviour occurs when a ship is dragged off the board
-// TODO clean up code NOW meaning BEFORE you move on. Doesn't have to take a lot of time,
-// just make sure everything's well-organized
-
 
 define(['./util', './game'], function(util, game) {
 
@@ -70,14 +67,14 @@ define(['./util', './game'], function(util, game) {
     const     $button = $('<button class="view-zero-button">Play Online</button>');
     function  proceed() {
       $('#opponent').data('level', 'online');
-      alert('It\'s on the to do list...');
+      goToWaitingRoom();
       removeViewButtons('zero');
     }
     return [$button, proceed];
   };
 
 
-  // VIEW ONE BUTTONS
+  // VIEW ONE-COMP BUTTONS
   const createChooseDifficultyButtons = () => {
     const level_buttons = [
       $('<button class="view-one-button">Easy</button>'),
@@ -95,6 +92,11 @@ define(['./util', './game'], function(util, game) {
     return level_buttons.map(
       ($button, i) => [$button, generateHandler(i + 1)]
     );
+  };
+
+  // ONLINE WAITING ROOM
+  const goToWaitingRoom = () => {
+    
   };
 
   // VIEW POSITIONING EVENTS

@@ -1,5 +1,53 @@
 
-define(['./util'], function(util) {
+define(['./util', './leaderboard'], function(util, leaderboard) {
+
+  const goToGameOverModal = (win, other_player='') => {
+    let header, body;
+    if(win) {
+      header = '<h3>You win!</h3>';
+      body = `
+        <p>You defeated your opponent in ${$('#player').data('shots')} shots. </p>
+        <p>Enter a username to save the result.<p>
+        <input 
+      `;
+    }
+    else {
+      header = '<h3>You lose!</h3>';
+      body = '<p>Better luck next time!</p>';
+    }
+
+    $game_over_modal = util.createModal('game_over', header, body);
+
+    if(win) {
+      $game_over_modal.find('input').on('keypress', function(event) {
+        if(event.key === 'Enter') {
+          if(!event.target.value) {
+            alert('username field cannot be empty');
+          }
+          else if(event.target.value === 'computer') {
+            alert('pick a different name');
+          }
+          else {
+            leaderboard.update(event.target.value, other_player);
+          }
+        }
+      });
+      $game_over_modal.on('hidden.bs.modal', function(event) {
+        event.preventDefault();
+        alert('Enter a username');
+      });
+      $game_over_modal.modal({
+        backdrop: 'static',
+        keyboard: false
+      });
+    }
+    else {
+      $game_over_modal.on('hidden.bs.modal', function(event) {
+        window.location.replace('/');
+      });
+      $game_over_modal.modal();      
+    }
+  };
 
   // AI
   const move = (level) => {
@@ -9,12 +57,15 @@ define(['./util'], function(util) {
       case 1: 
         easyMove($board);
         break;
+      case 2:
+        hardMove($board);
+        break;
     }
 
     util.updateBoardFromJSON('player');
     let win = checkWin($board.data('fleet'));
     if(win) {
-      alert('comp won');
+      goToGameOverModal(false);
     }
     else {
       computerPlay(level, 'player');
@@ -25,9 +76,30 @@ define(['./util'], function(util) {
     const fleet             = $board.data('fleet');
     const sea               = $board.data('sea');
     const possible_targets  = util.getAllUnmolested(fleet, sea);
-    attemptAttack($board, possible_targets[Math.floor(Math.random() * possible_targets.length)], 'computer');
+    return attemptAttack($board, possible_targets[Math.floor(Math.random() * possible_targets.length)], 'computer');
   };
 
+  const hardMove = ($board) => {
+    const fleet  = $board.data('fleet');
+    const sea    = $board.data('sea');
+
+    for(let ship_name in fleet) {
+      for(let part of fleet[ship_name].parts) {
+        if(part.state === 'hit') {
+          for(let target of fleet[ship_name].parts) {
+            if(target.state === 'unharmed') {
+              return attemptAttack($board, util.coordsToTileIndex(target.coords), 'computer');
+            }
+          }
+        }
+      }
+    }
+
+    const unmolested = util.getAllUnmolested(fleet, sea);
+    return attemptAttack($board, unmolested[Math.floor(Math.random() * unmolested.length)], 'computer');
+  };
+
+  // UPDATING THE DOM
   const addToShipGraveyard = (ship_name, player=true) => {
     let $grave;
     if(player) {
@@ -69,13 +141,7 @@ define(['./util'], function(util) {
 
     for(let ship_name in fleet) {
       for(let part of fleet[ship_name].parts) {
-
-        //console.log(part.coords, util.tileIndexToCoords(index));
-
         if(part.coords.toString() === util.tileIndexToCoords(index).toString()) {
-
-          //console.log('found ship with coords');
-
           if(part.state === 'unharmed') {
             part.state = 'hit';
             logMessage(who, `fires at ${index}: HIT`);
@@ -87,7 +153,6 @@ define(['./util'], function(util) {
         }
       } 
     }
-    //console.log('did not find ship with coords');
     if(sea.includes(index)) {
       return false;
     }
@@ -98,22 +163,25 @@ define(['./util'], function(util) {
   };
 
   // PLAYER MOVES
-  const getBoardClickHandler = ($board) => {
+  const getBoardClickHandler = ($board, computer_play=true) => {
     return function(event) {
       if($(event.target).prop('tagName') !== 'SPAN') {
         const index   = $(event.target).data('index');
         const change  = attemptAttack($board, index, 'player');
         if(change) {
+          let shots = Number($('#player').data('shots'));
+          shots ++;
+          $('#player').data('shots', `${shots}`);
           toggleOpponentBoardState(false);
           util.updateBoardFromJSON('opponent');
           let win = checkWin($board.data('fleet'));
           if(win) {
-            alert('You win!');
+            goToGameOverModal(true, (computer_play) ? 'computer' : $('#opponent').data('name'));
           }
           else {
             let level = $('#opponent').data('level');
             if(level === 'online') {
-
+              onlinePlay();
             }
             else {
               computerPlay(level, 'computer');
@@ -124,10 +192,10 @@ define(['./util'], function(util) {
     };
   };
 
-  const toggleOpponentBoardState = (on=true) => {
+  const toggleOpponentBoardState = (computer_play, on=true) => {
     const $board = $('#opponent').find('.board');
     if(on) {
-      $board.on('click', getBoardClickHandler($board)); 
+      $board.on('click', getBoardClickHandler($board, computer_play)); 
     }
     else {
       $board.off('click');
@@ -154,11 +222,11 @@ define(['./util'], function(util) {
 
     if(player_to_move === 'player') {
       toggleNameHighlights();
-      toggleOpponentBoardState();
+      toggleOpponentBoardState(true);
     }
     else {
       toggleNameHighlights(false);
-      setTimeout(() => move(level), 500); //1000);
+      setTimeout(() => move(level), 1000); 
     }
   };
 
@@ -168,6 +236,7 @@ define(['./util'], function(util) {
   };  
 
   const start = (level, first_player) => {
+    $('#player').data('shots', '0');
 
     logMessage(first_player, `goes first...`);
     $('.ship-graveyard').css('display', 'grid');
@@ -182,7 +251,8 @@ define(['./util'], function(util) {
     }
   };
 
-  const onlinePlay = (first_player) => {
+  //TODO...
+  const onlinePlay = (player_to_move) => {
 
   };
 

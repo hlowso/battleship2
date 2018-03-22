@@ -44,12 +44,12 @@
 }
 
 .board .ship-hit,
-.board .hit,
-.board .sunk {
+.board .hit {
   background-color: orange;
 }
 
-.board .ship-sunk {
+.board .ship-sunk,
+.board .sunk {
   background-color: red;
 }
 
