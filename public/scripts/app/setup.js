@@ -67,8 +67,7 @@ define(['./util', './game'], function(util, game) {
     const     $button = $('<button class="view-zero-button">Play Online</button>');
     function  proceed() {
       $('#opponent').data('level', 'online');
-      goToWaitingRoom();
-      removeViewButtons('zero');
+      goToLobby();
     }
     return [$button, proceed];
   };
@@ -95,8 +94,14 @@ define(['./util', './game'], function(util, game) {
   };
 
   // ONLINE WAITING ROOM
-  const goToWaitingRoom = () => {
-    
+  const goToLobby = () => {
+    const $lobby = util.createModal('lobby', `
+      Lobby
+    `, `
+      Welcome to the lobby. We are searching for other players online.
+    `);
+
+    $lobby.modal();
   };
 
   // VIEW POSITIONING EVENTS
