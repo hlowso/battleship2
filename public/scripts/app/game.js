@@ -236,6 +236,8 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
     $('#log-messages').prepend($message);
   };  
 
+  // TODO pick first player server side!
+  // TODO change name from player to player_name
   const start = (level, first_player) => {
     $('#player').data('shots', '0');
 
@@ -246,15 +248,13 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
       onlinePlay(first_player);
     }
     else {
-      const $name = $('<div class="name">Computer</div>');
-      $('#opponent').prepend($name);
       computerPlay(level, first_player);
     }
   };
 
   //TODO...
   const onlinePlay = (player_to_move) => {
-
+    alert('time to play!');
   };
 
   return {

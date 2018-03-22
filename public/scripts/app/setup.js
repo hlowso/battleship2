@@ -93,6 +93,8 @@ define(['./util', './game'], function(util, game) {
   // ONLINE WAITING ROOM
   const addMeToLobby = (username, $lobby) => {
     const ws = new WebSocket(util.WEBSOCKET_URL);
+    $('#player').data('ws', ws);
+
     ws.onopen = data => {
       ws.send(JSON.stringify({
         type: 'join',
@@ -100,31 +102,29 @@ define(['./util', './game'], function(util, game) {
       }));
 
       ws.onmessage = event => {
-        const opponent  = JSON.parse(event.data);
-        const opp_name  = opponent.username; 
+        const data  = JSON.parse(event.data);
 
-        $('#opponent').data('name', `${opp_name}`);
-        $lobby.find('p').text(`Found player: ${opp_name}. Game will start in 5 seconds.`);
-        
-        setTimeout(() => { 
-          $lobby.modal('hide').data('bs.modal', null);
-          removeView('zero');
-          beginPositioningPhase(); 
-        }, 5000);
-      };
-
-      ws.onclose = event => {
-        alert('Connection broken!');
-        window.location.replace('/');
+        if(data.broken) {
+          alert('Connection broken!');
+          window.location.replace('/');
+        }
+        else {
+          const opp_name  = data.opponent.username; 
+          $('#opponent').data('name', `${opp_name}`);
+          $lobby.find('p').text(`Found player: ${opp_name}. Game will start in 5 seconds.`);
+          
+          setTimeout(() => { 
+            $lobby.modal('hide').data('bs.modal', null);
+            removeView('zero');
+            beginPositioningPhase(); 
+          }, 0000);
+        }
       };
     };
 
     $('#player').data('name', username);
     $lobby.find('p').text('Added to lobby. Now waiting for opponent...');
     $lobby.find('input').remove();
-    $lobby.on('hidden.bs.modal', function(event) {
-      ws.close();
-    });
   };
 
   const goToLobby = () => {
@@ -352,6 +352,8 @@ define(['./util', './game'], function(util, game) {
 
     function proceedRandom() {
       removeView('post-positioning');
+      const $name = $('<div class="name">Computer</div>');
+      $('#opponent').prepend($name);
       printHTMLGrid('opponent');
       game.start(level, (Math.random() < 0.5) ? 'player' : 'opponent');
     }
@@ -366,6 +368,8 @@ define(['./util', './game'], function(util, game) {
       const getProcedure = (who) => {
         return function() {
           removeView('choice');
+          const $name = $('<div class="name">Computer</div>');
+          $('#opponent').prepend($name);
           printHTMLGrid('opponent');
           game.start(level, who);
         };
@@ -382,7 +386,33 @@ define(['./util', './game'], function(util, game) {
   const postPositioning = () => {           
     const level = $('#opponent').data('level');
     if(level === 'online') {
-      game.start('online');
+
+      const ws = $('#player').data('ws');
+      ws.send(JSON.stringify({ 
+        type: 'ready',
+        data: { fleet: $('#player').find('.board').data('fleet') }
+       }));
+
+      $('#opponent').prepend('<p>Waiting for opponent to finish positioning ships...</p>');
+
+      ws.onmessage = event => {
+        const data  = JSON.parse(event.data);
+        if(data.broken) {
+          ws.close();
+          alert('Connection broken!');
+          window.location.replace('/');
+        }
+        else {
+          $('#opponent').find('p').each(function() {
+            $(this).remove();
+          });
+          const $name = $(`<div class="name">${$('#opponent').data('name')}</div>`);
+          $('#opponent').prepend($name);
+          printHTMLGrid('opponent');
+          $('#opponent').find('.board').data('fleet', data.fleet);
+          game.start('online');
+        }
+      };
     }
     else {
       showChooseFirstButtons(level);
