@@ -97,7 +97,10 @@ define(['./util', './game'], function(util, game) {
   const addMeToLobby = (username, $lobby) => {
     const ws = new WebSocket(util.WEBSOCKET_URL);
     ws.onopen = data => {
-      console.log('Connected over here!');
+      ws.send(JSON.stringify({
+        type: 'join',
+        data: { username }
+      }));
     };
 
     $('#player').data('name', username);
