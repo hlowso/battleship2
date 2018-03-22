@@ -94,12 +94,29 @@ define(['./util', './game'], function(util, game) {
   };
 
   // ONLINE WAITING ROOM
+  const addMeToLobby = (username) => {
+    alert('will add ' + username);
+  };
+
   const goToLobby = () => {
     const $lobby = util.createModal('lobby', `
-      Lobby
+      <h3>Lobby</h3>
     `, `
-      Welcome to the lobby. We are searching for other players online.
+      <p>Enter a username to join the lobby.<p>
+      <input placeholder="..."> 
     `);
+
+    $lobby.find('input').on('keypress', function(event) {
+      if(event.key === 'Enter') {
+        const username = util.escape(event.target.value);
+        if(!username) {
+          alert('field must not be left empty');
+        }
+        else {
+          addMeToLobby(username);
+        }
+      }
+    });
 
     $lobby.modal();
   };

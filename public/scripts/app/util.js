@@ -275,6 +275,12 @@ define(function() {
     `);
   };
 
+  const escape = (str) => {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  };
+
   return {
     x_indeces, 
     coordsToTileIndex,
@@ -287,6 +293,7 @@ define(function() {
     validateCoords,
     rotateVector,
     getAllUnmolested,
-    createModal
+    createModal,
+    escape
   };
 });

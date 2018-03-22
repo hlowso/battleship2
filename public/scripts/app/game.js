@@ -8,7 +8,7 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
       body = `
         <p>You defeated your opponent in ${$('#player').data('shots')} shots. </p>
         <p>Enter a username to save the result.<p>
-        <input 
+        <input placeholder="...">
       `;
     }
     else {
@@ -21,14 +21,15 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
     if(win) {
       $game_over_modal.find('input').on('keypress', function(event) {
         if(event.key === 'Enter') {
-          if(!event.target.value) {
+          let username = util.escape(event.target.value);
+          if(!username) {
             alert('username field cannot be empty');
           }
-          else if(event.target.value === 'computer') {
+          else if(username === 'computer') {
             alert('pick a different name');
           }
           else {
-            leaderboard.update(event.target.value, other_player);
+            leaderboard.update(username, other_player);
           }
         }
       });
