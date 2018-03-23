@@ -3,16 +3,16 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
 
   const goToGameOverModal = (win, other_player='') => {
     let header, body;
-    if(win && other_player === 'computer') {
+    if(win) {
       header = '<h3>You win!</h3>';
-      body = `
-        <p>You defeated your opponent in ${$('#player').data('shots')} shots. </p>
+      body = `<p>You defeated your opponent in ${$('#player').data('shots')} shots. </p>`;
+
+      if(other_player === 'computer') {
+        body += `
         <p>Enter a username to save the result.<p>
         <input placeholder="...">
       `;
-    }
-    else if(win) {
-      // TODO
+      }
     }
     else {
       header = '<h3>You lose!</h3>';
@@ -44,10 +44,6 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
         backdrop: 'static',
         keyboard: false
       });
-    }
-    else if(win) {
-      // TODO
-      alert('Plyaer has won and its a online game make this part look nice');
     }
     else {
       $game_over_modal.on('hidden.bs.modal', function(event) {
@@ -183,15 +179,16 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
     return function(event) {
       if($(event.target).prop('tagName') !== 'SPAN') {
         const index   = $(event.target).data('index');
-        const change  = attemptAttack($board, index, 'player');
+        const change  = attemptAttack($board, index, (computer_play) ? 'player' : $('#player').data('name'));
         if(change) {
           let shots = Number($('#player').data('shots'));
           shots ++;
           $('#player').data('shots', `${shots}`);
-          toggleOpponentBoardState(false);
+          toggleOpponentBoardState(false, false);
           util.updateBoardFromJSON('opponent');
           let win = checkWin($board.data('fleet'));
           if(win) {
+            sendBoardJSON($('#player').data('ws'), 'attack');
             goToGameOverModal(true, (computer_play) ? 'computer' : 'person');
           }
           else {
@@ -246,15 +243,17 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
     }
   };
 
-  const logMessage = (who, message, online=false) => {
+  const logMessage = (who, message) => {
     const $message = $(`<p> - <strong>${who}</strong> ${message}</p>`);
     $('#log-messages').prepend($message);
 
-    const ws = $('#player').data('ws');
-    ws.send(JSON.stringify({ 
-      type: 'log',
-      data: { html: $message.prop('outerHTML') }
-    }));
+    if($('#opponent').data('level') === 'online') {
+      const ws = $('#player').data('ws');
+      ws.send(JSON.stringify({ 
+        type: 'log',
+        data: { html: $message.prop('outerHTML') }
+      }));    
+    }
   };  
 
   const start = (level, first_player) => {
@@ -262,8 +261,9 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
     $('.ship-graveyard').css('display', 'grid');
 
     if(level === 'online') {
-      let who = (first_player === 'player') ? $('#player').data('name') : $('#opponent').data('name');
-      logMessage(who, 'goes first...');
+      if(first_player === 'player') {
+        logMessage($('#player').data('name'), 'goes first...');
+      }
       onlinePlay(first_player);
     }
     else {
@@ -272,37 +272,43 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
     }
   };
 
-  const awaitOpponent = () => {
-    const ws = $('#player').data('ws');
-    ws.onmessage = event => {
-      const data  = JSON.parse(event.data);
+  const generateOnMessageHandler = (callback) => {
+    return event => {
+      const data = JSON.parse(event.data);
       if(data.broken) {
-        ws.close();
-        alert('Connection broken!');
-        window.location.replace('/');
+        $disconnect = util.createModal('disconnect', 'Disconnected!', 'You were probably too intimidating for your opponent.');
+        $disconnect.on('hidden.bs.modal', function(event) {
+          window.location.replace('/');
+        });
+        $disconnect.modal();  
       }
       else {
-
-        console.log(data);
-
-        if(data.fleet) {
-          const $board = $('#player').find('.board');
-          $('#player').find('.board').data('fleet', data.fleet);
-          $('#player').find('.board').data('sea', data.sea);
-          util.updateBoardFromJSON('player');
-          let win = checkWin($board.data('fleet'));
-          if(win) {
-            goToGameOverModal(false);
-          }
-          else {
-            onlinePlay('player');
-          }   
-        }
-        else {
-          $('#log-messages').prepend($(data.html));
-        }
+        callback(data);
       }
     };
+  };
+
+  const awaitOpponent = () => {
+    const ws = $('#player').data('ws');
+    ws.onmessage = generateOnMessageHandler(data => {
+      console.log(data);
+      if(data.fleet) {
+        const $board = $('#player').find('.board');
+        $('#player').find('.board').data('fleet', data.fleet);
+        $('#player').find('.board').data('sea', data.sea);
+        util.updateBoardFromJSON('player');
+        let win = checkWin($board.data('fleet'));
+        if(win) {
+          goToGameOverModal(false);
+        }
+        else {
+          onlinePlay('player');
+        }   
+      }
+      else {
+        $('#log-messages').prepend($(data.html));
+      }
+    });
   };
 
   const onlinePlay = (player_to_move) => {
@@ -318,6 +324,7 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
 
   return {
     start,
-    sendBoardJSON
+    sendBoardJSON,
+    generateOnMessageHandler
   };
 });

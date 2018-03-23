@@ -103,25 +103,17 @@ define(['./util', './game'], function(util, game) {
         data: { username }
       }));
 
-      ws.onmessage = event => {
-        const data  = JSON.parse(event.data);
-
-        if(data.broken) {
-          alert('Connection broken!');
-          window.location.replace('/');
-        }
-        else {
-          const opp_name  = data.opponent.username; 
-          $('#opponent').data('name', `${opp_name}`);
-          $lobby.find('p').text(`Found player: ${opp_name}. Game will start in 5 seconds.`);
-          
-          setTimeout(() => { 
-            $lobby.modal('hide').data('bs.modal', null);
-            removeView('zero');
-            beginPositioningPhase(); 
-          }, 0000);
-        }
-      };
+      ws.onmessage = game.generateOnMessageHandler((data) => {
+        const opp_name  = escape(data.opponent.username); 
+        $('#opponent').data('name', `${opp_name}`);
+        $lobby.find('p').html(`Found player: <strong>${opp_name}</strong>. Game will start in 3 seconds.`);
+        
+        setTimeout(() => { 
+          $lobby.modal('hide').data('bs.modal', null);
+          removeView('zero');
+          beginPositioningPhase(); 
+        }, 3000);
+      });
     };
 
     $('#player').data('name', username);
@@ -395,16 +387,8 @@ define(['./util', './game'], function(util, game) {
       game.sendBoardJSON(ws, 'ready');
       $('#opponent').prepend('<p>Waiting for opponent to finish positioning ships...</p>');
 
-      ws.onmessage = event => {
-        ws.onmessage = null;
-        const data  = JSON.parse(event.data);
-        if(data.broken) {
-          ws.close();
-          alert('Connection broken!');
-          window.location.replace('/');
-        }
-        else {
-          $('#opponent').find('p').each(function() {
+      ws.onmessage = game.generateOnMessageHandler((data) => {
+        $('#opponent').find('p').each(function() {
             $(this).remove();
           });
           const $name = $(`<div class="name">${$('#opponent').data('name')}</div>`);
@@ -413,8 +397,7 @@ define(['./util', './game'], function(util, game) {
           $('#opponent').find('.board').data('fleet', data.fleet);
           let first_player = (data.first) ? 'player' : 'opponent';
           game.start('online', first_player);
-        }
-      };
+      });
     }
     else {
       showChooseFirstButtons(level);
