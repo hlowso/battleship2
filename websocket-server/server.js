@@ -12,20 +12,39 @@ const clients       = [];
 const users         = [];
 const rooms         = [];
 
-const getSocket = (id) => {
-  return clients.find(ws => ws.id === id);
+const getSocketIndex = (id, remove = false) => {
+  let index;
+  let ws = clients.find((ws, i) => { 
+    index = i;
+    return (ws.id === id); 
+  });
+
+  return index;
 };
 
-const getUserBySocketId = (id) => {
-  return users.find(user => user.ws_id === id);
+const getUserIndexBySocketId = (id, remove = false) => {
+  let index;
+  let user = users.find((user, i) => { 
+    index = i;
+    return (user.ws_id === id); 
+  });
+
+  return index;
 };
 
-const getRoomBySocketId = (id) => {
-  return rooms.find(room => (room.player1.ws_id === id || room.player2.ws_id === id));
+const getRoomIndexBySocketId = (id, remove = false) => {
+  let index;
+  let room = rooms.find((room, i) => { 
+    index = i;
+    return (room.player1.ws_id === id || room.player2.ws_id === id); 
+  });
+
+  return index;
 };
 
 const getOpponentBySocketId = (id) => {
-  const room = getRoomBySocketId(id);
+  const room_index = getRoomIndexBySocketId(id);
+  const room = rooms[room_index];
   if(room.player1.ws_id !== id) {
     return room.player1;
   }
@@ -34,9 +53,25 @@ const getOpponentBySocketId = (id) => {
   }
 };
 
+const getSocket = (id) => {
+  return clients[getSocketIndex(id)];
+};
+const getUserBySocketId = (id) => {
+  return users[getUserIndexBySocketId(id)];
+};
+
+
 wss.on('connection', (ws) => {
 
   console.log('Client connected');
+  // setTimeout(() => {
+  //   console.log('here');
+  //   ws.send(JSON.stringify({ broken: true }));
+  // }, 2000);
+
+  // const simulateOtherPlayerCloses = () => {
+  //   ws.close();
+  // };
 
   const joinProtocol = ({ username }) => {
     ws.id = uuid();
@@ -45,7 +80,6 @@ wss.on('connection', (ws) => {
       ws_id: ws.id,
       username
     };
-    console.log('JOINING:', user);
 
     let index;
     const partner = users.find(user => !user.engaged);
@@ -133,5 +167,28 @@ wss.on('connection', (ws) => {
   };
 
   ws.on('message', handleMessage);
-  ws.on('close', () => console.log('Client disconnected')); // TODO
+  ws.on('close', () => {
+    // Close opponent socket
+    try {
+
+
+      const opponent = getOpponentBySocketId(ws.id);
+
+      console.log(opponent);
+
+      getSocket(opponent.ws_id).send(JSON.stringify({ broken: true }));
+
+    // Delete all objects
+      users.splice(getUserIndexBySocketId(ws.id), 1);
+      users.splice(getUserIndexBySocketId(opponent.ws_id), 1);
+      rooms.splice(getRoomIndexBySocketId(opponent.ws_id), 1);
+      clients.splice(getSocketIndex(ws.id));
+      clients.splice(getSocketIndex(opponent.ws_id));
+    }
+    catch(err) {
+      console.log(err);
+    }
+
+    console.log('Client disconnected');
+  }); 
 });
