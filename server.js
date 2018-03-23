@@ -27,14 +27,14 @@ MongoClient.connect(MONGODB_URI, (err, mongoDB) => {
       });
   });
 
-  dataAccess.updateLeaderboard({ 
-    username: 'lorde',
-    opponent: 'computer'
-  });
+  // dataAccess.updateLeaderboard({ 
+  //   username: 'lorde',
+  //   opponent: 'computer'
+  // });
 
   app.put('/leaderboard', (req, res) => {
     dataAccess.updateLeaderboard(req.body);
-    res.send('got through to put');
+    res.status(200).send();
   });
 
   app.listen(PORT, () => {

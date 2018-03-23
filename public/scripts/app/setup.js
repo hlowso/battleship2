@@ -92,6 +92,8 @@ define(['./util', './game'], function(util, game) {
 
   // ONLINE WAITING ROOM
   const addMeToLobby = (username, $lobby) => {
+    $('#player').find('.name').text(username);
+
     const ws = new WebSocket(util.WEBSOCKET_URL);
     $('#player').data('ws', ws);
 
@@ -383,19 +385,18 @@ define(['./util', './game'], function(util, game) {
     showOrRemoveButton(buttons[1], proceedChoice, $('#opponent'));
   };
 
+  
+
   const postPositioning = () => {           
     const level = $('#opponent').data('level');
     if(level === 'online') {
 
       const ws = $('#player').data('ws');
-      ws.send(JSON.stringify({ 
-        type: 'ready',
-        data: { fleet: $('#player').find('.board').data('fleet') }
-       }));
-
+      game.sendBoardJSON(ws, 'ready');
       $('#opponent').prepend('<p>Waiting for opponent to finish positioning ships...</p>');
 
       ws.onmessage = event => {
+        ws.onmessage = null;
         const data  = JSON.parse(event.data);
         if(data.broken) {
           ws.close();
@@ -410,7 +411,8 @@ define(['./util', './game'], function(util, game) {
           $('#opponent').prepend($name);
           printHTMLGrid('opponent');
           $('#opponent').find('.board').data('fleet', data.fleet);
-          game.start('online');
+          let first_player = (data.first) ? 'player' : 'opponent';
+          game.start('online', first_player);
         }
       };
     }
@@ -421,11 +423,11 @@ define(['./util', './game'], function(util, game) {
 
 
   return {
-    printHTMLGrid: printHTMLGrid,
-    showOrRemoveButton: showOrRemoveButton,
-    createPlayCompButton: createPlayCompButton,
-    createPlayOnlineButton: createPlayOnlineButton,
-    createChooseDifficultyButtons: createChooseDifficultyButtons 
+    printHTMLGrid,
+    showOrRemoveButton,
+    createPlayCompButton,
+    createPlayOnlineButton,
+    createChooseDifficultyButtons
   };
 
 });

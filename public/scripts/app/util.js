@@ -1,5 +1,3 @@
-// TODO there is at least one bug in randomizeFleet(). Sometimes ships end up overlapped.
-
 define(function() {
 
   const x_indeces             = 'ABCDEFGHIJ';

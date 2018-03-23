@@ -3,13 +3,16 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
 
   const goToGameOverModal = (win, other_player='') => {
     let header, body;
-    if(win) {
+    if(win && other_player === 'computer') {
       header = '<h3>You win!</h3>';
       body = `
         <p>You defeated your opponent in ${$('#player').data('shots')} shots. </p>
         <p>Enter a username to save the result.<p>
         <input placeholder="...">
       `;
+    }
+    else if(win) {
+      // TODO
     }
     else {
       header = '<h3>You lose!</h3>';
@@ -18,7 +21,7 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
 
     $game_over_modal = util.createModal('game_over', header, body);
 
-    if(win) {
+    if(win && other_player === 'computer') {
       $game_over_modal.find('input').on('keypress', function(event) {
         if(event.key === 'Enter') {
           let username = util.escape(event.target.value);
@@ -41,6 +44,10 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
         backdrop: 'static',
         keyboard: false
       });
+    }
+    else if(win) {
+      // TODO
+      alert('Plyaer has won and its a online game make this part look nice');
     }
     else {
       $game_over_modal.on('hidden.bs.modal', function(event) {
@@ -164,6 +171,14 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
   };
 
   // PLAYER MOVES
+  const sendBoardJSON = (ws, message_type) => {
+    const $board = (message_type === 'ready') ? $('#player').find('.board') : $('#opponent').find('.board');
+    ws.send(JSON.stringify({ 
+      type: message_type,
+      data: { fleet: $board.data('fleet'), sea: $board.data('sea') }
+    }));
+  };
+
   const getBoardClickHandler = ($board, computer_play=true) => {
     return function(event) {
       if($(event.target).prop('tagName') !== 'SPAN') {
@@ -177,12 +192,13 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
           util.updateBoardFromJSON('opponent');
           let win = checkWin($board.data('fleet'));
           if(win) {
-            goToGameOverModal(true, (computer_play) ? 'computer' : $('#opponent').data('name'));
+            goToGameOverModal(true, (computer_play) ? 'computer' : 'person');
           }
           else {
             let level = $('#opponent').data('level');
             if(level === 'online') {
-              onlinePlay();
+              sendBoardJSON($('#player').data('ws'), 'attack');
+              onlinePlay('opponent');
             }
             else {
               computerPlay(level, 'computer');
@@ -220,7 +236,6 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
   };
 
   const computerPlay = (level, player_to_move) => {
-
     if(player_to_move === 'player') {
       toggleNameHighlights();
       toggleOpponentBoardState(true);
@@ -231,33 +246,78 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
     }
   };
 
-  const logMessage = (who, message) => {
+  const logMessage = (who, message, online=false) => {
     const $message = $(`<p> - <strong>${who}</strong> ${message}</p>`);
     $('#log-messages').prepend($message);
+
+    const ws = $('#player').data('ws');
+    ws.send(JSON.stringify({ 
+      type: 'log',
+      data: { html: $message.prop('outerHTML') }
+    }));
   };  
 
-  // TODO pick first player server side!
-  // TODO change name from player to player_name
   const start = (level, first_player) => {
     $('#player').data('shots', '0');
-
-    logMessage(first_player, `goes first...`);
     $('.ship-graveyard').css('display', 'grid');
 
     if(level === 'online') {
+      let who = (first_player === 'player') ? $('#player').data('name') : $('#opponent').data('name');
+      logMessage(who, 'goes first...');
       onlinePlay(first_player);
     }
     else {
+      logMessage(first_player, 'goes first...');
       computerPlay(level, first_player);
     }
   };
 
-  //TODO...
+  const awaitOpponent = () => {
+    const ws = $('#player').data('ws');
+    ws.onmessage = event => {
+      const data  = JSON.parse(event.data);
+      if(data.broken) {
+        ws.close();
+        alert('Connection broken!');
+        window.location.replace('/');
+      }
+      else {
+
+        console.log(data);
+
+        if(data.fleet) {
+          const $board = $('#player').find('.board');
+          $('#player').find('.board').data('fleet', data.fleet);
+          $('#player').find('.board').data('sea', data.sea);
+          util.updateBoardFromJSON('player');
+          let win = checkWin($board.data('fleet'));
+          if(win) {
+            goToGameOverModal(false);
+          }
+          else {
+            onlinePlay('player');
+          }   
+        }
+        else {
+          $('#log-messages').prepend($(data.html));
+        }
+      }
+    };
+  };
+
   const onlinePlay = (player_to_move) => {
-    alert('time to play!');
+    if(player_to_move === 'player') {
+      toggleNameHighlights();
+      toggleOpponentBoardState(false);
+    }
+    else {
+      toggleNameHighlights(false);
+      awaitOpponent();
+    }
   };
 
   return {
-    start
+    start,
+    sendBoardJSON
   };
 });

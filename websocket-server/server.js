@@ -25,11 +25,7 @@ const getRoomBySocketId = (id) => {
 };
 
 const getOpponentBySocketId = (id) => {
-  // console.log(id);
   const room = getRoomBySocketId(id);
-
-  // console.log(room);
-
   if(room.player1.ws_id !== id) {
     return room.player1;
   }
@@ -81,16 +77,39 @@ wss.on('connection', (ws) => {
 
   const readyProtocol = ({ fleet }) => {
 
-    console.log(fleet, users);
-
     const user = getUserBySocketId(ws.id);
     user.fleet = fleet;
-
     const opponent = getOpponentBySocketId(ws.id);
+
     if(opponent.fleet) {
-      getSocket(opponent.ws_id).send(JSON.stringify({ fleet }));
-      getSocket(user.ws_id).send(JSON.stringify({ fleet: opponent.fleet }));
+
+      let user_message = {
+        fleet: opponent.fleet
+      };
+      let opponent_message = {
+        fleet
+      };
+
+      if(Math.random() < 0.5) {
+        user_message.first = true;
+      }
+      else {
+        opponent_message.first = true;
+      }
+
+      getSocket(opponent.ws_id).send(JSON.stringify(opponent_message));
+      getSocket(user.ws_id).send(JSON.stringify(user_message));
     }
+  };
+
+  const attackProtocol = ({ fleet, sea }) => {
+    const opponent = getOpponentBySocketId(ws.id);
+    getSocket(opponent.ws_id).send(JSON.stringify({ fleet, sea }));
+  };  
+
+  const logProtocol = ({ html }) => {
+    const opponent = getOpponentBySocketId(ws.id);
+    getSocket(opponent.ws_id).send(JSON.stringify({ html }));
   };
 
   const handleMessage  = (message_string) => {
@@ -104,9 +123,15 @@ wss.on('connection', (ws) => {
       case 'ready':
         readyProtocol(data);
         break;
+      case 'attack':
+        attackProtocol(data);
+        break;
+      case 'log':
+        logProtocol(data);
+        break;
     }
   };
 
   ws.on('message', handleMessage);
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => console.log('Client disconnected')); // TODO
 });
