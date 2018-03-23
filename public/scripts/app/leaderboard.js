@@ -51,6 +51,7 @@ define(['./util'], function(util) {
         url: '/leaderboard',
         method: 'GET',
         success: (res) => {
+          console.log('res: ', res);
           printLeaderboardHTML(res);
         }
       });

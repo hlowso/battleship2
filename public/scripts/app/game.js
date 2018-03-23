@@ -31,6 +31,9 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
           else if(username === 'computer') {
             alert('pick a different name');
           }
+          else if(!/^[a-z1-9]$/i.test(username)) {
+            alert('username must consist only of alphanumeric characters');
+          }
           else {
             leaderboard.update(username, other_player);
           }
@@ -44,6 +47,15 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
         backdrop: 'static',
         keyboard: false
       });
+    }
+    else if(win) {
+      $game_over_modal.on('hidden.bs.modal', function(event) {
+        leaderboard.update($('#player').data('name'), 'human');
+        const ws = $('#player').data('ws');
+        ws.send(JSON.stringify({ type: 'over' }));
+        window.location.replace('/');
+      });
+      $game_over_modal.modal();  
     }
     else {
       $game_over_modal.on('hidden.bs.modal', function(event) {
@@ -124,7 +136,18 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
       part.state = 'sunk';
     }
     logMessage(who, `has sunk the ${ship_name}!`);
-    addToShipGraveyard(ship_name, (who === 'player'));
+
+    if($('#opponent').data('level') === 'online') {
+      addToShipGraveyard(ship_name, (who === $('#player').data('name')));
+      const ws = $('#player').data('ws');
+      ws.send(JSON.stringify({
+        type: 'sink',
+        data: { ship_name }
+      }));
+    }
+    else {
+      addToShipGraveyard(ship_name, (who === 'player'));
+    }
     return true;
   };
 
@@ -291,7 +314,7 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
   const awaitOpponent = () => {
     const ws = $('#player').data('ws');
     ws.onmessage = generateOnMessageHandler(data => {
-      console.log(data);
+
       if(data.fleet) {
         const $board = $('#player').find('.board');
         $('#player').find('.board').data('fleet', data.fleet);
@@ -304,6 +327,12 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
         else {
           onlinePlay('player');
         }   
+      }
+      else if(data.ship_name){
+
+        console.log('here', data.ship_name);
+
+        addToShipGraveyard(data.ship_name, false);
       }
       else {
         $('#log-messages').prepend($(data.html));

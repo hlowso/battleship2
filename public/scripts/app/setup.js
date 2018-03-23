@@ -94,6 +94,7 @@ define(['./util', './game'], function(util, game) {
   const addMeToLobby = (username, $lobby) => {
     $('#player').find('.name').text(username);
 
+    console.log(util.WEBSOCKET_URL);
     const ws = new WebSocket(util.WEBSOCKET_URL);
     $('#player').data('ws', ws);
 
@@ -134,6 +135,9 @@ define(['./util', './game'], function(util, game) {
         const username = util.escape(event.target.value);
         if(!username) {
           alert('field must not be left empty');
+        }
+        else if(!/^[a-z1-9]$/i.test(username)) {
+          alert('username must consist only of alphanumeric characters');
         }
         else {
           addMeToLobby(username, $lobby);

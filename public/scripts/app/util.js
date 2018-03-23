@@ -279,7 +279,8 @@ define(function() {
     return div.innerHTML;
   };
 
-  const WEBSOCKET_URL = 'ws://localhost:3001';
+  // const url = location.origin.replace(/^http/, 'ws');
+  const WEBSOCKET_URL = location.origin.replace(/^http/, 'ws');//"ws://localhost:3001";
 
   return {
     x_indeces, 
