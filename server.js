@@ -4,7 +4,7 @@ const express       = require('express');
 const WebSocket     = require('ws');
 const SocketServer  = WebSocket.Server;
 
-const PORT          = 3001;
+const PORT          = 8080;
 
 const MongoClient   = require("mongodb").MongoClient;
 const MONGODB_URI   = "mongodb://localhost:27017/";

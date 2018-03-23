@@ -31,7 +31,7 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
           else if(username === 'computer') {
             alert('pick a different name');
           }
-          else if(!/^[a-z1-9]$/i.test(username)) {
+          else if(!/^[a-z1-9]*$/i.test(username)) {
             alert('username must consist only of alphanumeric characters');
           }
           else {
