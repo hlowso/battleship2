@@ -1,23 +1,18 @@
+// TODO in the mongo connection section below, you still have to 
+// start by creating the database and collection if they don't 
+// exist. Maybe don't even bother checking if they exist, just destroy
+// em and then recreate them.
+
 const uuid          = require('uuid-v4');
 const bodyParser    = require('body-parser');
 const express       = require('express');
 const WebSocket     = require('ws');
 const SocketServer  = WebSocket.Server;
 
-const PORT          = process.env.PORT || 8080;
-
-console.log('port', process.env.PORT);
+const PORT          = process.env.PORT || 3001;
 
 const MongoClient   = require("mongodb").MongoClient;
 const MONGODB_URI   = "mongodb://localhost:27017/";
-
-// const app = express()
-//   .use(bodyParser.urlencoded({ extended: false }))
-//   .use(express.static('public'))
-//   .use('/', lb_routes)
-//   .use(express.Router)
-//   .use((req, res) => res.sendFile(__dirname + '/public/index.html'))
-//   .listen(PORT, () => console.log(`Listening on ${ PORT }`));
   
 MongoClient.connect(MONGODB_URI, (err, mongoDB) => {
   if(err) {

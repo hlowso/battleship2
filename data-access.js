@@ -1,6 +1,6 @@
 module.exports = (mongoDB) => {
   const db           = mongoDB.db('battleship');
-  const lb_col  = db.collection('leaderboard');
+  const lb_col       = db.collection('leaderboard');
 
   return {
 

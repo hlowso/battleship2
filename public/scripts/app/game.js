@@ -299,7 +299,7 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
     return event => {
       const data = JSON.parse(event.data);
       if(data.broken) {
-        $disconnect = util.createModal('disconnect', 'Disconnected!', 'You were probably too intimidating for your opponent.');
+        $disconnect = util.createModal('disconnect', 'Disconnected!', 'You probably intimidated your opponent...');
         $disconnect.on('hidden.bs.modal', function(event) {
           window.location.replace('/');
         });
