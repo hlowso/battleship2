@@ -1,7 +1,5 @@
-// TODO in the mongo connection section below, you still have to 
-// start by creating the database and collection if they don't 
-// exist. Maybe don't even bother checking if they exist, just destroy
-// em and then recreate them.
+
+require('dotenv').config();
 
 const uuid          = require('uuid-v4');
 const bodyParser    = require('body-parser');
@@ -12,7 +10,8 @@ const SocketServer  = WebSocket.Server;
 const PORT          = process.env.PORT || 3001;
 
 const MongoClient   = require("mongodb").MongoClient;
-const MONGODB_URI   = "mongodb://localhost:27017/";
+const MONGODB_URI   = `mongodb://hlowso:${process.env.MONGODB_PASSWORD}@ds133659.mlab.com:33659/battleship`;
+// const MONGODB_URI   = "mongodb://localhost:27017/";
   
 MongoClient.connect(MONGODB_URI, (err, mongoDB) => {
   if(err) {
