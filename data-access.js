@@ -1,6 +1,17 @@
 module.exports = (mongoDB) => {
   const db           = mongoDB.db('battleship');
-  const lb_col       = db.collection('leaderboard');
+
+
+  // console.log(mongoDB);
+
+
+  // TEST
+  // db.createCollection("customers", function(err, res) {
+  //   if (err) throw err;
+  //   console.log("Collection created!");
+  // });
+
+  // const lb_col       = db.collection('leaderboard');
 
   return {
 

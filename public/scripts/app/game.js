@@ -50,6 +50,7 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
     }
     else if(win) {
       $game_over_modal.on('hidden.bs.modal', function(event) {
+        console.log('Gunna call leaderboard now');
         leaderboard.update($('#player').data('name'), 'human');
         const ws = $('#player').data('ws');
         ws.send(JSON.stringify({ type: 'over' }));
