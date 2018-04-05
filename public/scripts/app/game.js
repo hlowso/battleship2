@@ -1,3 +1,5 @@
+// TODO if the user quits first at the end of the game, it seems the win data
+// is not sent to the database...
 
 define(['./util', './leaderboard'], function(util, leaderboard) {
 
@@ -50,7 +52,6 @@ define(['./util', './leaderboard'], function(util, leaderboard) {
     }
     else if(win) {
       $game_over_modal.on('hidden.bs.modal', function(event) {
-        console.log('Gunna call leaderboard now');
         leaderboard.update($('#player').data('name'), 'human');
         const ws = $('#player').data('ws');
         ws.send(JSON.stringify({ type: 'over' }));

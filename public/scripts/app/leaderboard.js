@@ -58,7 +58,6 @@ define(['./util'], function(util) {
     },
 
     update: (username, opponent) => {
-      console.log('AJAX TIME!');
       $.ajax({
         url: '/leaderboard',
         method: 'PUT',
